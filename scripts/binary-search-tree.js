@@ -1,4 +1,3 @@
-import { prettyPrint } from "./pretty-print.js";
 class Node {
   data = null;
   left = null;
@@ -7,7 +6,7 @@ class Node {
     this.data = root;
   }
 }
-class Tree {
+export class Tree {
   #root;
   constructor(arr) {
     arr = [...new Set(arr)];
@@ -67,15 +66,103 @@ class Tree {
     }
     return item;
   }
+  levelOrderForEachItr(callback) {
+    if (typeof callback !== "function")
+      throw new TypeError("Callback is not a function");
+    const queue = [this.#root];
+    while (queue.length !== 0) {
+      const curr = queue.shift();
+      if (curr.left !== null) queue.push(curr.left);
+      if (curr.right !== null) queue.push(curr.right);
+      callback(curr.data);
+    }
+  }
+  // will visit later
+  // levelOrderForEachRec(callback,queue=[this.#root]){
+  //   if (typeof callback !== "function")
+  //     throw new TypeError("Callback is not a function");
+
+  // }
+  inorderForEach(callback, item = this.#root) {
+    if (typeof callback !== "function")
+      throw new TypeError("Callback is not a function");
+    if (item === null) return;
+    this.inorderForEach(callback, item.left);
+    callback(item.data);
+    this.inorderForEach(callback, item.right);
+  }
+  preorderForEach(callback, item = this.#root) {
+    if (typeof callback !== "function")
+      throw new TypeError("Callback is not a function");
+    if (item === null) return;
+    callback(item.data);
+    this.preorderForEach(callback, item.left);
+    this.preorderForEach(callback, item.right);
+  }
+  postorderForEach(callback, item = this.#root) {
+    if (typeof callback !== "function")
+      throw new TypeError("Callback is not a function");
+    if (item === null) return;
+
+    this.postorderForEach(callback, item.left);
+    this.postorderForEach(callback, item.right);
+    callback(item.data);
+  }
+  traverseNodes(node, count = -1) {
+    if (node === null) return count;
+    let leftCount = this.traverseNodes(node.left, count + 1);
+    let rightCount = this.traverseNodes(node.right, count + 1);
+    return Math.max(leftCount, rightCount);
+  }
+  height(value, item = this.#root) {
+    if (item === null) return;
+    if (value < item.data) return this.height(value, item.left);
+    else if (value > item.data) return this.height(value, item.right);
+    else if (value === item.data) {
+      return this.traverseNodes(item);
+    }
+  }
+  depth(value, item = this.#root, count = 0) {
+    if (item === null) return;
+    if (value < item.data) return this.depth(value, item.left, count + 1);
+    else if (value > item.data) return this.depth(value, item.right, count + 1);
+    else if (value === item.data) {
+      return count;
+    }
+  }
+  isBalanced(item = this.#root) {
+    if (item === null) return true;
+    let heightDiff;
+    if (item.right === null && item.left === null) {
+      return true;
+    }
+    if (item.right === null) {
+      heightDiff = this.height(item.left.data);
+    } else if (item.left === null) {
+      heightDiff = this.height(item.right.data);
+    } else {
+      heightDiff = this.height(item.right.data) - this.height(item.left.data);
+    }
+
+    if (heightDiff > 1 || heightDiff < -1) {
+      return false;
+    }
+    return this.isBalanced(item.left) && this.isBalanced(item.right);
+  }
+  rebalance() {
+    if (!this.isBalanced()) {
+      let arr = [];
+      let addtoArr = (item) => {
+        arr.push(item);
+      };
+      this.inorderForEach(addtoArr);
+      arr.sort((a, b) => a - b);
+      this.#root = this.#buildTree(arr, 0, arr.length - 1);
+      console.log("tree is balanced now");
+    } else {
+      console.log("Tree is balanced");
+    }
+  }
 }
 
-let tree = new Tree([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324]);
-// tree.insert(0);
-// tree.insert(10);
-// tree.insert(11);
-// tree.insert(23);
-
-tree.delNode(8);
-prettyPrint(tree.root);
-console.log(tree.root.left.left);
-console.log(tree.includes(4));
+/// RAndom tests
