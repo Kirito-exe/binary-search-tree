@@ -45,15 +45,37 @@ class Tree {
       this.insert(value, item.right);
     }
   }
-  deleteItem() {}
+  getSuccessor(node) {
+    node = node.right;
+    while (node !== null && node.left !== null) node = node.left;
+    return node;
+  }
+  delNode(value, item = this.#root) {
+    if (item === null) return item;
+    if (item.data > value) item.left = this.delNode(value, item.left);
+    else if (item.data < value) item.right = this.delNode(value, item.right);
+    else {
+      if (item.left === null) {
+        return item.right;
+      }
+      if (item.right === null) {
+        return item.left;
+      }
+      const succ = this.getSuccessor(item);
+      item.data = succ.data;
+      item.right = this.delNode(succ.data, item.right);
+    }
+    return item;
+  }
 }
-let tree = new Tree([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324]);
-tree.insert(0);
-tree.insert(10);
-tree.insert(11);
-tree.insert(23);
 
-tree.deleteItem(8);
+let tree = new Tree([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324]);
+// tree.insert(0);
+// tree.insert(10);
+// tree.insert(11);
+// tree.insert(23);
+
+tree.delNode(8);
 prettyPrint(tree.root);
 console.log(tree.root.left.left);
 console.log(tree.includes(4));
